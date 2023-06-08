@@ -71,83 +71,112 @@ public class WeatherApp extends Application {
     }
 
     private void showUpdateDialog(WeatherData weatherData) {
-        // Create dialog stage
         Stage dialogStage = new Stage();
         dialogStage.setTitle("Update Weather Data");
 
-        // Create input fields with initial values from WeatherData
-        TextField temperatureField = new TextField(weatherData.getTemperatureData());
-        TextField currentConditionsField = new TextField(weatherData.getCurrentConditionsData());
-        TextField forecastField = new TextField(weatherData.getForecastData());
+        TextField temperatureField = createTextField(weatherData.getTemperatureData());
+        TextField currentConditionsField = createTextField(weatherData.getCurrentConditionsData());
+        TextField forecastField = createTextField(weatherData.getForecastData());
 
-        // Create update button
-        Button updateButton = new Button("Update");
+        Button updateButton = createButton("Update");
         updateButton.setOnAction(e -> {
             String temperature = temperatureField.getText();
             String currentConditions = currentConditionsField.getText();
             String forecast = forecastField.getText();
 
-            // Update weather data
             weatherData.updateWeatherData(temperature, currentConditions, forecast);
 
-            // Update input fields with new data in all dialogs
-            for (TextField textField : temperatureFields) {
-                textField.setText(weatherData.getTemperatureData());
-            }
-            for (TextField textField : currentConditionsFields) {
-                textField.setText(weatherData.getCurrentConditionsData());
-            }
-            for (TextField textField : forecastFields) {
-                textField.setText(weatherData.getForecastData());
-            }
+            updateInputFields(weatherData);
         });
 
-        // Create remove buttons
-        Button removeTemperatureButton = new Button("Remove Temperature");
+        Button subscribeTemperatureButton = createButton("Subscribe Temperature");
+        subscribeTemperatureButton.setOnAction(e -> {
+            System.out.println("Temperature Observer added");
+            weatherData.registerObserver(temperatureDisplay);
+        });
+
+        Button subscribeConditionsButton = createButton("Subscribe Conditions");
+        subscribeConditionsButton.setOnAction(e -> {
+            System.out.println("Current Conditions Observer added");
+            weatherData.registerObserver(currentConditionsDisplay);
+        });
+
+        Button subscribeForecastButton = createButton("Subscribe Forecast");
+        subscribeForecastButton.setOnAction(e -> {
+            System.out.println("Forecast Observer added");
+            weatherData.registerObserver(forecastDisplay);
+        });
+
+        Button removeTemperatureButton = createButton("Remove Temperature");
         removeTemperatureButton.setOnAction(e -> {
+            System.out.println("Temperature Observer removed");
             weatherData.removeObserver(temperatureDisplay);
         });
 
-        Button removeConditionsButton = new Button("Remove Conditions");
+        Button removeConditionsButton = createButton("Remove Conditions");
         removeConditionsButton.setOnAction(e -> {
+            System.out.println("Current Conditions Observer removed");
             weatherData.removeObserver(currentConditionsDisplay);
         });
 
-        Button removeForecastButton = new Button("Remove Forecast");
+        Button removeForecastButton = createButton("Remove Forecast");
         removeForecastButton.setOnAction(e -> {
+            System.out.println("Forecast Observer removed");
             weatherData.removeObserver(forecastDisplay);
         });
 
-        // Create dialog layout
         VBox dialogLayout = new VBox(10);
         dialogLayout.setPadding(new Insets(10));
         dialogLayout.getChildren().addAll(
-                new Label("Temperature:"),
-                temperatureField,
-                new Label("Current Conditions:"),
-                currentConditionsField,
-                new Label("Forecast:"),
-                forecastField,
+                createLabel("Temperature:"), temperatureField,
+                createLabel("Current Conditions:"), currentConditionsField,
+                createLabel("Forecast:"), forecastField,
                 updateButton,
-                removeTemperatureButton,
-                removeConditionsButton,
-                removeForecastButton
+                subscribeTemperatureButton, subscribeConditionsButton, subscribeForecastButton,
+                removeTemperatureButton, removeConditionsButton, removeForecastButton
         );
 
-        Scene dialogScene = new Scene(dialogLayout, 300, 300);
+        Scene dialogScene = new Scene(dialogLayout, 300, 500);
         dialogStage.setScene(dialogScene);
 
-        // Add the text fields to the corresponding lists
         temperatureFields.add(temperatureField);
         currentConditionsFields.add(currentConditionsField);
         forecastFields.add(forecastField);
 
-        // Show the dialog and wait until it is closed
         dialogStage.showAndWait();
 
-        // Remove the text fields from the lists after the dialog is closed
         temperatureFields.remove(temperatureField);
         currentConditionsFields.remove(currentConditionsField);
         forecastFields.remove(forecastField);
+    }
+
+    private TextField createTextField(String initialValue) {
+        TextField textField = new TextField(initialValue);
+        textField.setPrefWidth(200);
+        return textField;
+    }
+
+    private Button createButton(String text) {
+        Button button = new Button(text);
+        button.setPrefWidth(200);
+        return button;
+    }
+
+    private Label createLabel(String text) {
+        Label label = new Label(text);
+        label.setStyle("-fx-font-weight: bold");
+        return label;
+    }
+
+    private void updateInputFields(WeatherData weatherData) {
+        for (TextField textField : temperatureFields) {
+            textField.setText(weatherData.getTemperatureData());
+        }
+        for (TextField textField : currentConditionsFields) {
+            textField.setText(weatherData.getCurrentConditionsData());
+        }
+        for (TextField textField : forecastFields) {
+            textField.setText(weatherData.getForecastData());
+        }
     }
 }
